@@ -953,7 +953,7 @@ procedure MoveStat(statId: integer; newX, newY: integer);
 			if (statId = 0) and scrollOffset then begin
 				redrawRequired := false;
 
-				if ((newX - Board.Info.DrawXOffset) < ((BOARD_DRAW_WIDTH div 2) - 3))
+				if ((newX - Board.Info.DrawXOffset) < ((BOARD_DRAW_WIDTH div 2) - 2))
 					and (Board.Info.DrawXOffset > 1)
 				then begin
 					if (X - 1) = newX then begin
@@ -1070,7 +1070,6 @@ function Difference(a, b: integer): integer;
 procedure GameUpdateSidebar;
 	var
 		numStr: string[8];
-		{drawnChar: char;}
 		drawnColor: byte;
 		i: integer;
 		bottomDraw: boolean;
@@ -1120,10 +1119,6 @@ procedure GameUpdateSidebar;
 			end;
 
 			{ Bottom half of HUD }
-			
-			{ Name of Z }
-			{VideoWriteText(0, 23, $6F, '            ');}
-			
 			zIdx := -1;
 			bottomDraw := false;
 			for i := 1 to MAX_FLAG do begin
