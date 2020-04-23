@@ -38,6 +38,7 @@ interface
 	procedure HighScoresAdd(score: integer);
 	function EditorGetBoardName(boardId: integer; titleScreenIsNone: boolean): TSmallString;
 	function EditorSelectBoard(title: string; currentBoard: integer; titleScreenIsNone: boolean): integer;
+	procedure SidebarPromptSlider(editable: boolean; x, y: integer; prompt: string; var value: byte);
 
 implementation
 uses Dos, Crt, Video, Sounds, Input, Elements, Oop, Game;

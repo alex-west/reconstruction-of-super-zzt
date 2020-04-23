@@ -1778,6 +1778,10 @@ procedure GameTitleLoop;
 						ReturnBoardId := World.Info.CurrentBoard;
 						returningFromGame := true;
 					end;
+					'S': begin
+						SidebarPromptSlider(true, 66, 21, 'Game speed:;FS', TickSpeed);
+						InputKeyPressed := #0;
+					end;
 				end;
 			end;
 			if runTitle then begin

@@ -9,11 +9,13 @@ This is a personal fork of the Reconstruction of Super ZZT, which is a reverse-e
   - HUD is now a single row above the viewport.
   - The Z-counter name, Z-counter amount, and timer are displayed below the viewport, if they are defined for the board/world.
 - Editor is accessible without using a command-line switch
+- Adjustable game speed (press S on the title screen)
   
 ## Planned Features
 
-- Adjustable game speed
 - Support for user-made splash screens
+- Minor editor enhancements
+- New cheats
 
 ## Directory structure
 
