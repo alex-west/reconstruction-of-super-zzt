@@ -1773,7 +1773,7 @@ procedure GameTitleLoop;
 					'|': begin
 						GameDebugPrompt;
 					end;
-					'E': if EditorEnabled then begin
+					'E': begin
 						EditorLoop;
 						ReturnBoardId := World.Info.CurrentBoard;
 						returningFromGame := true;

@@ -8,10 +8,11 @@ This is a personal fork of the Reconstruction of Super ZZT, which is a reverse-e
   - Video mode is still 40 columns, but the viewport is now 36 columns wide, instead of 24.
   - HUD is now a single row above the viewport.
   - The Z-counter name, Z-counter amount, and timer are displayed below the viewport, if they are defined for the board/world.
-
+- Editor is accessible without using a command-line switch
+  
 ## Planned Features
 
-- Removing the need to use a command-line switch to access the editor
+- Adjustable game speed
 - Support for user-made splash screens
 
 ## Directory structure

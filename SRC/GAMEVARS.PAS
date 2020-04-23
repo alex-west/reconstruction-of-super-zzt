@@ -208,7 +208,6 @@ interface
 
 		HighScoreList: THighScoreList;
 
-		EditorEnabled: boolean;
 		IsRegistered: boolean;
 		ResetConfig: boolean;
 		JustStarted: boolean;

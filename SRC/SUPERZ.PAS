@@ -43,7 +43,6 @@ procedure ParseArguments;
 						SoundTimeCheckCounter := 0;
 						UseSystemTimeForElapsed := false;
 					end;
-					'E': EditorEnabled := true;
 				end;
 			end else begin
 				StartupWorldFileName := pArg;
@@ -115,7 +114,6 @@ begin
 	ResourceDataFileName := '';
 
 	GameTitleExitRequested := false;
-	EditorEnabled := false;
 	IsRegistered := false;
 
 	ParseArguments;
