@@ -65,8 +65,8 @@ procedure ElementMessageTimerTick(statId: integer);
 		with Board.Stats[statId] do begin
 			case X of
 				0: begin
-					VideoWriteText(26 - (Length(MessageLine1) div 2), 23, $19 + (P2 mod 7), ' '+MessageLine1+' ');
-					VideoWriteText(26 - (Length(MessageLine2) div 2), 24, $19 + (P2 mod 7), ' '+MessageLine2+' ');
+					VideoWriteText(19 - (Length(MessageLine1) div 2), 23, $19 + (P2 mod 7), ' '+MessageLine1+' ');
+					VideoWriteText(19 - (Length(MessageLine2) div 2), 24, $19 + (P2 mod 7), ' '+MessageLine2+' ');
 					P2 := P2 - 1;
 					if P2 <= 0 then begin
 						RemoveStat(statId);

@@ -111,8 +111,8 @@ procedure GenerateTransitionTable;
 		t: TCoord;
 	begin
 		i := 0;
-		for iy := 0 to 19 do
-			for ix := 0 to 23 do begin
+		for iy := 0 to BOARD_DRAW_HEIGHT-1 do
+			for ix := 0 to BOARD_DRAW_WIDTH-1 do begin
 				Inc(i);
 				TransitionTable[i].X := ix;
 				TransitionTable[i].Y := iy;
@@ -411,8 +411,9 @@ procedure TransitionDrawToBoard;
 
 procedure ClearDisplayMessage;
 	begin
-		VideoWriteText(12, 23, $1F, '                            ');
-		VideoWriteText(12, 24, $1F, '                            ');
+		VideoWriteText(4, 23, $1F, '                               ');
+		VideoWriteText(4, 24, $1F, '                               ');
+		GameUpdateSidebar;
 	end;
 
 procedure DrawStatusMessage(msg: string);
@@ -952,7 +953,7 @@ procedure MoveStat(statId: integer; newX, newY: integer);
 			if (statId = 0) and scrollOffset then begin
 				redrawRequired := false;
 
-				if ((newX - Board.Info.DrawXOffset) < 9)
+				if ((newX - Board.Info.DrawXOffset) < ((BOARD_DRAW_WIDTH div 2) - 3))
 					and (Board.Info.DrawXOffset > 1)
 				then begin
 					if (X - 1) = newX then begin
@@ -975,7 +976,7 @@ procedure MoveStat(statId: integer; newX, newY: integer);
 				end;
 
 
-				if ((newX - Board.Info.DrawXOffset) >= 14)
+				if ((newX - Board.Info.DrawXOffset) >= ((BOARD_DRAW_WIDTH div 2) + 2))
 					and ((Board.Info.DrawXOffset + BOARD_DRAW_WIDTH) <= BOARD_WIDTH)
 				then begin
 					if (X + 1) = newX then begin
@@ -1069,62 +1070,134 @@ function Difference(a, b: integer): integer;
 procedure GameUpdateSidebar;
 	var
 		numStr: string[8];
-		drawnChar: char;
+		{drawnChar: char;}
+		drawnColor: byte;
 		i: integer;
+		bottomDraw: boolean;
+		zIdx: integer;
+		x: integer;
 	begin
 		if GameStateElement = E_PLAYER then begin
 			if World.Info.Health < 0 then
 				World.Info.Health := 0;
+			
+			{ Top half of HUD }
+			
+			{ Classic health bar }
+			{
 			for i := 1 to 5 do begin
 				if (i * 20) <= World.Info.Health then
-					VideoWriteText(i + 6, 15, $6E, #219)
+					VideoWriteText(i + 2, 0, $6E, #219)
 				else if ((i * 20) - 10) > World.Info.Health then
-					VideoWriteText(i + 6, 15, $6E, ' ')
+					VideoWriteText(i + 2, 0, $6E, ' ')
 				else
-					VideoWriteText(i + 6, 15, $6E, #221)
+					VideoWriteText(i + 2, 0, $6E, #221)
 			end;
+			}
+			
+			Str(World.Info.Health, numStr);
+			VideoWriteText(3, 0, $6E, '     ');
+			VideoWriteText(3, 0, $6E, numStr);
 
 			Str(World.Info.Gems, numStr);
-			VideoWriteText(7, 17, $6E, '   ');
-			VideoWriteText(11 - Length(numStr), 17, $6E, numStr);
+			VideoWriteText(10, 0, $6E, '     ');
+			VideoWriteText(10, 0, $6E, numStr);
 
 			Str(World.Info.Ammo, numStr);
-			VideoWriteText(7, 18, $6E, '   ');
-			VideoWriteText(11 - Length(numStr), 18, $6E, numStr);
+			VideoWriteText(17, 0, $6E, '     ');
+			VideoWriteText(17, 0, $6E, numStr);
 
 			Str(World.Info.Score, numStr);
-			VideoWriteText(7, 21, $6E, '   ');
-			VideoWriteText(11 - Length(numStr), 21, $6E, numStr);
+			VideoWriteText(24, 0, $6E, '     ');
+			VideoWriteText(24, 0, $6E, numStr);
+			
+			for i := 1 to 7 do begin
+				if World.Info.Keys[i] then
+					drawnColor := $68 + i
+				else
+					drawnColor := $60;
+				VideoWriteText(i + 30, 0, drawnColor, ElementDefs[E_KEY].Character);
+			end;
 
-			VideoWriteText(0, 22, $6F, '            ');
+			{ Bottom half of HUD }
+			
+			{ Name of Z }
+			{VideoWriteText(0, 23, $6F, '            ');}
+			
+			zIdx := -1;
+			bottomDraw := false;
 			for i := 1 to MAX_FLAG do begin
 				if (Length(World.Info.Flags[i]) <> 0)
 					and (World.Info.Flags[i][1] = 'Z')
 				then begin
-					VideoWriteText(1, 22, $6F, Copy(World.Info.Flags[i], 2, Length(World.Info.Flags[i]) - 1));
+					zIdx := i;
+					bottomDraw := true;
 				end;
 			end;
-			if World.Info.StonesOfPower >= 0 then begin
-				Str(World.Info.StonesOfPower, numStr);
-				VideoWriteText(11 - Length(numStr), 22, $6E, numStr);
+			
+			if World.Info.StonesOfPower >= 0 then
+				bottomDraw := true;
+				
+			if Board.Info.TimeLimitSec > 0 then
+				bottomDraw := true;
+			
+			if bottomDraw then begin
+				x := 0;
+				
+				{ left side }
+				VideoWriteText(x, 24, $1D, #222);
+				x := x + 1;
+				
+				{ z name }
+				if zIdx >= 0 then begin
+					VideoWriteText(1, 24, $6F, Copy(World.Info.Flags[zIdx], 2, Length(World.Info.Flags[zIdx]) - 1));
+					x := x + Length(World.Info.Flags[zIdx]) - 1;
+				end;
+				
+				{ space 1 }
+				if (zIdx >= 0)
+				and ((World.Info.StonesOfPower >= 0) or (Board.Info.TimeLimitSec > 0)) then begin
+					VideoWriteText(x, 24, $6F, ' ');
+					x := x+1;
+				end;
+				
+				{ z amount}
+				if World.Info.StonesOfPower >= 0 then begin
+					Str(World.Info.StonesOfPower, numStr);
+					VideoWriteText(x, 24, $6E, numStr);
+					x := x + Length(numStr);
+				end;
+				
+				{ space 2 }
+				if ((zIdx >= 0) or (World.Info.StonesOfPower >= 0)) and (Board.Info.TimeLimitSec > 0) then begin
+					VideoWriteText(x, 24, $6F, ' ');
+					x := x+1;
+				end;
+				
+				{ timer }
+				if Board.Info.TimeLimitSec > 0 then begin
+					VideoWriteText(x, 24, $64, #19#32);
+					x := x+2;
+					Str(Board.Info.TimeLimitSec - World.Info.BoardTimeSec, numStr);
+					VideoWriteText(x, 24, $6E, numStr);
+					x := x + Length(numStr);
+				end;
+				
+				{ right side }
+				VideoWriteText(x, 24, $1D, #221);
+				x := x+1;
+				
+				for x := x to 40 do begin
+					VideoWriteText(x, 24, $11, ' ');
+				end;
+				
+			end else begin
+				VideoWriteText(0, 24, $11, '                                        ');
 			end;
-
-			for i := 1 to 7 do begin
-				if World.Info.Keys[i] then
-					drawnChar := ElementDefs[E_KEY].Character
-				else
-					drawnChar := ' ';
-				VideoWriteText(((i - 1) mod 4) + 7, ((i - 1) div 4) + 19, $68 + i, drawnChar);
-			end;
-
-			if SoundEnabled then
-				VideoWriteText(3, 10, $6E, 'Be Quiet ')
-			else
-				VideoWriteText(3, 10, $6E, 'Be Noisy ');
-
+			
 			if DebugEnabled then begin
 				Str(MemAvail, numStr);
-				VideoWriteText(0, 0, $1E, 'm' + numStr + ' ');
+				VideoWriteText(0, 1, $1E, 'm' + numStr + ' ');
 			end;
 		end;
 	end;
@@ -1399,14 +1472,17 @@ procedure DrawPlayfieldBorder;
 	begin
 		VideoWriteText(BOARD_DRAW_X - 1, BOARD_DRAW_Y - 1, $1F,
 			#220#220#220#220#220#220#220#220#220#220#220#220#220
-			+ #220#220#220#220#220#220#220#220#220#220#220#220#220);
+			+ #220#220#220#220#220#220#220#220#220#220#220#220#220
+			+ #220#220#220#220#220#220#220#220#220#220#220#220);
 		VideoWriteText(BOARD_DRAW_X - 1, BOARD_DRAW_Y + BOARD_DRAW_HEIGHT, $1F,
 			#223);
 		VideoWriteText(BOARD_DRAW_X, BOARD_DRAW_Y + BOARD_DRAW_HEIGHT, $7F,
 			#223#223#223#223#223#223#223#223#223#223#223#223#223
+			+ #223#223#223#223#223#223#223#223#223#223#223#223
 			+ #223#223#223#223#223#223#223#223#223#223#223#223);
 		for i := BOARD_DRAW_Y to (BOARD_DRAW_Y + BOARD_DRAW_HEIGHT - 1) do begin
-			VideoWriteText(BOARD_DRAW_X - 1, i, $0F, #219'                        '#219);
+			VideoWriteText(BOARD_DRAW_X - 1, i, $0F, #219);
+			VideoWriteText(BOARD_DRAW_X + BOARD_DRAW_WIDTH, i, $0F, #219);
 			VideoWriteText(BOARD_DRAW_X + BOARD_DRAW_WIDTH + 1, i + 1, $17, #221);
 		end;
 	end;
@@ -1438,6 +1514,7 @@ procedure GamePlayLoop(isTitle: boolean);
 		begin
 			VideoClear(Blue);
 			if GameStateElement = E_PLAYER then begin
+				{
 				VideoWriteText(0, 0, $1D, #220#220#220#220#220#220#220#220#220#220#220#220);
 				VideoWriteText(0, 1, $6F, '  Commands  ');
 				VideoWriteText(0, 2, $6D, #223#223#223#223#223#223#223#223#223#223#223#223);
@@ -1460,7 +1537,17 @@ procedure GamePlayLoop(isTitle: boolean);
 				VideoWriteText(0, 12, $1D, #220#220#220#220#220#220#220#220#220#220#220#220);
 				VideoWriteText(0, 13, $6F, '   Status   ');
 				VideoWriteText(0, 14, $6D, #223#223#223#223#223#223#223#223#223#223#223#223);
+				}
+				
+				VideoWriteText(0, 0, $1D, #222);
+				VideoWriteText(1, 0, $6F, '                                      ');
+				VideoWriteText(2, 0, $64, #3); { Health }
+				VideoWriteText(9, 0, $62, #4); { Gems }
+				VideoWriteText(16, 0, $6B, #132); { Ammo }
+				VideoWriteText(23, 0, $6F, #158); { Score }
+				VideoWriteText(39, 0, $1D, #221);
 
+				{
 				VideoWriteText(0, 15, $6F, 'Health      ');
 				VideoWriteText(0, 16, $6F, '            ');
 				VideoWriteText(0, 17, $6F, ' Gems       ');
@@ -1472,10 +1559,11 @@ procedure GamePlayLoop(isTitle: boolean);
 				VideoWriteText(0, 21, $6F, ' Score      ');
 				VideoWriteText(0, 22, $6F, '            ');
 				VideoWriteText(0, 23, $6F, '            ');
+				}
 			end else if GameStateElement = E_MONITOR then begin
-				VideoWriteText(4, 10, $1E, 'Press');
-				VideoWriteText(4, 12, $1F, 'ENTER');
-				VideoWriteText(1, 14, $1E, 'to continue');
+				VideoWriteText(8, 0, $1E, 'Press');
+				VideoWriteText(14, 0, $1F, 'ENTER');
+				VideoWriteText(20, 0, $1E, 'to continue');
 			end;
 
 			DrawPlayfieldBorder;
